@@ -45,7 +45,7 @@ WindowManager::~WindowManager()
 
 std::optional<std::pair<int, int>> WindowManager::get_window_xy(xcb_connection_t *conn, xcb_window_t win)
 {
-  auto                      geometry = xcb_get_geometry(conn, win);
+  auto geometry = xcb_get_geometry(conn, win);
   xcb_get_geometry_reply_t *r = xcb_get_geometry_reply(conn, geometry, nullptr);
   if (!r)
     return std::nullopt;
