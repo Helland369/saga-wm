@@ -23,11 +23,12 @@ void Utils::die(const std::string &msg)
 void Utils::spawn(const std::string &cmd)
 {
   pid_t pid = fork();
-  if (pid < 0) die("fork");
+  if (pid < 0)
+    die("fork");
   if (pid == 0)
   {
     setsid();
-    execl("/bin/sh", "sh", "-lc", cmd.c_str(), (char*)nullptr);
+    execl("/bin/sh", "sh", "-lc", cmd.c_str(), (char *)nullptr);
     _exit(127);
   }
-}  
+}
