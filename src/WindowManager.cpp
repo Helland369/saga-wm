@@ -32,11 +32,6 @@ WindowManager::WindowManager()
   keysyms_ = xcb_key_symbols_alloc(conn_);
   if (!keysyms_)
     utils_.die("xcb_key_symbols_alloc");
-
-  cookie_ = xcb_change_window_attributes_checked(conn_,
-                                                 root_,
-                                                 XCB_CW_EVENT_MASK,
-                                                 values_);
 }
 
 WindowManager::~WindowManager()
@@ -45,7 +40,7 @@ WindowManager::~WindowManager()
 
 std::optional<std::pair<int, int>> WindowManager::get_window_xy(xcb_connection_t *conn, xcb_window_t win)
 {
-  auto geometry = xcb_get_geometry(conn, win);
+  auto                      geometry = xcb_get_geometry(conn, win);
   xcb_get_geometry_reply_t *r = xcb_get_geometry_reply(conn, geometry, nullptr);
   if (!r)
     return std::nullopt;
@@ -55,15 +50,20 @@ std::optional<std::pair<int, int>> WindowManager::get_window_xy(xcb_connection_t
   return std::make_pair(x, y);
 }
 
-void WindowManager::loop()
+bool WindowManager::initialize()
 {
+  cookie_ = xcb_change_window_attributes_checked(conn_,
+                                                 root_,
+                                                 XCB_CW_EVENT_MASK,
+                                                 values_);
+
   err_ = xcb_request_check(conn_, cookie_);
   if (err_)
   {
     std::cerr << "Another WM is already running!\n";
     free(err_);
     xcb_disconnect(conn_);
-    return;
+    return false;
   }
 
   enter_codes_ = xcb_key_symbols_get_keycode(keysyms_, enter_sym_);
@@ -101,6 +101,14 @@ void WindowManager::loop()
                   XCB_MOD_MASK_1);
 
   xcb_flush(conn_);
+
+  return true;
+}
+
+void WindowManager::loop()
+{
+  if (!initialize())
+    return;
 
   while ((event_ = xcb_wait_for_event(conn_)))
   {

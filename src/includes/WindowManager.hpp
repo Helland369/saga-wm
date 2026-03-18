@@ -50,7 +50,8 @@ private:
   Utils     utils_;
 
   static std::optional<std::pair<int, int>> get_window_xy(xcb_connection_t *conn, xcb_window_t win);
-
+  bool initialize();    
+  
 public:
   WindowManager();
   ~WindowManager();
